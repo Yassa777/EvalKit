@@ -23,6 +23,7 @@ dependencies = [
     "prometheus-client>=0.17.0",
     "python-crontab>=3.0.0",
     "wandb>=0.15.0",
+    "pgvector>=0.2.0",
 ]
 requires-python = ">=3.9"
 
@@ -41,4 +42,15 @@ ignore = []
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-addopts = "-v --cov=evalkit" 
+addopts = "-v --cov=evalkit"
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+
+[[tool.mypy.overrides]]
+module = ["fastapi.*", "pydantic.*"]
+ignore_missing_imports = true 

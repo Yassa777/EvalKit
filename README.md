@@ -1,134 +1,132 @@
 # EvalKit
 
-A production-grade evaluation and optimization system for LLM-powered features, with a focus on retrieval-augmented generation (RAG) systems.
+An open-source evaluation and optimization system for LLM-powered features, with a focus on retrieval-augmented generation (RAG).
 
 ## Features
 
-- Real-time query/response ingestion and storage
-- Manual and automated evaluation of LLM interactions
-- Golden dataset management and testing
-- Automated evaluation loops
-- CI integration for blocking regressions
-- Vector store benchmarking (FAISS, Qdrant, pgvector)
-- Active learning from user feedback
-- Metrics dashboard integration
+- Track and test various metrics for LLM-powered features
+- Support for multiple vector stores (FAISS and pgvector)
+- Comprehensive evaluation system
+- Real-time monitoring and metrics collection
+- Beautiful Streamlit dashboard
+- Docker support for easy deployment
 
-## Architecture
-
-### Core Components
-
-1. **Ingestion Service**
-   - FastAPI endpoint for real-time query/response capture
-   - Authentication via HMAC or Bearer tokens
-   - Async database operations
-
-2. **Database Layer**
-   - SQLite (development) → PostgreSQL (production)
-   - SQLAlchemy ORM with async support
-   - Alembic migrations
-
-3. **Evaluation System**
-   - Rich-based CLI for manual evaluation
-   - Automated evaluation via LLM judges
-   - Golden dataset management
-   - Active learning integration
-
-4. **Monitoring & Metrics**
-   - Prometheus + Grafana integration
-   - Latency, cost, and quality metrics
-   - Automated alerting
-
-5. **Vector Store Integration**
-   - Support for multiple vector stores
-   - Benchmarking tools
-   - Easy switching between backends
-
-## Getting Started
-
-### Prerequisites
+## Prerequisites
 
 - Python 3.9+
-- SQLite (development) or PostgreSQL (production)
-- Docker and Docker Compose (optional)
+- Docker and Docker Compose
+- OpenAI API key
 
-### Installation
+## Quick Start
 
 1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/evalkit.git
-   cd evalkit
-   ```
+```bash
+git clone https://github.com/yourusername/evalkit.git
+cd evalkit
+```
 
-2. Create and activate a virtual environment:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
+2. Create a `.env` file:
+```bash
+cp .env.example .env
+# Edit .env with your settings
+```
 
-3. Install dependencies:
-   ```bash
-   pip install -e .
-   ```
+3. Start the services:
+```bash
+docker-compose up -d
+```
 
-4. Initialize the database:
-   ```bash
-   alembic upgrade head
-   ```
+4. Access the services:
+- API: http://localhost:8000
+- Dashboard: http://localhost:8501
+- Grafana: http://localhost:3000 (admin/admin)
+- Prometheus: http://localhost:9090
 
-5. Start the development server:
-   ```bash
-   uvicorn evalkit.api.main:app --reload
-   ```
+## Vector Store Options
 
-### Usage
+EvalKit supports two vector store implementations:
 
-1. **Ingesting Data**
-   ```python
-   import requests
+### FAISS
+- In-memory vector store
+- Fast similarity search
+- Good for development and testing
+- Configure with `VECTOR_STORE_TYPE=faiss`
 
-   response = requests.post(
-       "http://localhost:8000/api/v1/interactions",
-       json={
-           "query": "What is RAG?",
-           "response": "Retrieval-Augmented Generation...",
-           "metadata": {"source": "test"}
-       },
-       headers={"Authorization": "Bearer your-token"}
-   )
-   ```
-
-2. **Running Evaluations**
-   ```bash
-   evalkit evaluate --dataset golden --model gpt-4
-   ```
-
-3. **Viewing Metrics**
-   ```bash
-   evalkit metrics --dashboard
-   ```
+### pgvector
+- PostgreSQL-based vector store
+- Persistent storage
+- Production-ready
+- Configure with `VECTOR_STORE_TYPE=pgvector`
 
 ## Development
 
-### Project Structure
-
-```
-evalkit/
-├── api/            # FastAPI application
-├── core/           # Core business logic
-├── db/             # Database models and migrations
-├── eval/           # Evaluation system
-├── metrics/        # Metrics collection
-├── vector/         # Vector store integration
-└── cli/            # Command-line interface
-```
-
-### Running Tests
-
+1. Create a virtual environment:
 ```bash
-pytest
+python -m venv venv
+source venv/bin/activate  # or `venv\Scripts\activate` on Windows
 ```
 
-### Contributing
+2. Install dependencies:
+```bash
+pip install -e .
+```
+
+3. Initialize the database:
+```bash
+alembic upgrade head
+```
+
+4. Start the development server:
+```bash
+uvicorn evalkit.api.main:app --reload
+```
+
+## API Usage
+
+### Record an Interaction
+
+```python
+import requests
+
+response = requests.post(
+    "http://localhost:8000/interactions",
+    json={
+        "query": "What is the capital of France?",
+        "response": "The capital of France is Paris.",
+        "metadata": {
+            "model": "gpt-4",
+            "temperature": 0.7
+        }
+    }
+)
+```
+
+### Run an Evaluation
+
+```python
+response = requests.post(
+    "http://localhost:8000/evaluations",
+    json={
+        "interaction_id": 1,
+        "criteria": {
+            "relevance": 0.9,
+            "coherence": 0.8,
+            "completeness": 0.7
+        }
+    }
+)
+```
+
+## Monitoring
+
+EvalKit includes comprehensive monitoring through Prometheus and Grafana:
+
+- Track interaction counts
+- Monitor response times
+- Analyze evaluation scores
+- Set up alerts for performance issues
+
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch
